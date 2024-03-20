@@ -66,7 +66,8 @@ def rectangle():
     # Hide the sketch
     # sketch.isVisible = False
 
-def truss_down(n, w, h, th):
+#truss
+def truss_down(n, w, h, th, ex):
     try :
         #init
         # Get the active Fusion 360 application
@@ -124,11 +125,18 @@ def truss_down(n, w, h, th):
         dirPoint = adsk.core.Point3D.create(0, -0.5, 0)
         offsetCurves = sketch.offset(curves, dirPoint, -th)
 
+        for i in range(n):
+            extrudes = root_comp.features.extrudeFeatures
+            profile = sketch.profiles.item(i)
+            distance = adsk.core.ValueInput.createByReal(ex)  # Extrusion distance
+            extrude_input = extrudes.createInput(profile, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
+            extrude_input.setDistanceExtent(False, distance)
+            cube = extrudes.add(extrude_input)
+
     except:
         if ui:
             ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
-
-def truss_up(n, w, h, th):
+def truss_up(n, w, h, th, ex):
     try :
         #init
         # Get the active Fusion 360 application
@@ -174,6 +182,14 @@ def truss_up(n, w, h, th):
         # Create the offset.
         dirPoint = adsk.core.Point3D.create(0, 0.5, 0)
         offsetCurves = sketch.offset(curves, dirPoint, -th)
+
+        for i in range(n-1):
+            extrudes = root_comp.features.extrudeFeatures
+            profile = sketch.profiles.item(i)
+            distance = adsk.core.ValueInput.createByReal(ex)  # Extrusion distance
+            extrude_input = extrudes.createInput(profile, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
+            extrude_input.setDistanceExtent(False, distance)
+            cube = extrudes.add(extrude_input)
     except:
         if ui:
             ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
@@ -181,12 +197,12 @@ def truss_up(n, w, h, th):
 
 
 
-def truss(n,w,h,th):
-    truss_up(n,w,h,th)
-    truss_down(n,w,h,th)
+def truss(n,w,h,th,ex):
+    truss_up(n,w,h,th,ex)
+    truss_down(n,w,h,th,ex)
 
 def main():
-    truss(5,20,2,0.25)
+    truss(10,30,2,0.25,3)
 
 def run(context):
     try:
