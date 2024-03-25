@@ -194,12 +194,39 @@ def truss_up(n, w, h, th, ex):
         if ui:
             ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
         
+def bridge_com():
+    app = adsk.core.Application.get()
+    ui = app.userInterface
+    design = app.activeProduct
 
+    try:
+        # Get the root component of the active design.
+        root_comp = design.rootComponent
+
+        # Get two bodies to combine.
+        bodies = root_comp.bRepBodies
+
+        body1 = bodies.item(0)
+        body2 = bodies.item(1)
+
+        # Create a new combine feature input.
+        combine_features = root_comp.features.combineFeatures
+        combine_input = combine_features.createInput(body1, body2)
+
+        # Set the operation to join the bodies. Use adsk.fusion.FeatureOperations.NewBodyFeatureOperation for new body.
+        combine_input.operation = adsk.fusion.FeatureOperations.JoinFeatureOperation
+
+        # Create the combine feature.
+        combine_features.add(combine_input)
+
+    except Exception as e:
+        ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
 
 def truss(n,w,h,th,ex):
     truss_up(n,w,h,th,ex)
     truss_down(n,w,h,th,ex)
+    bridge_com()
 
 def main():
     truss(10,30,2,0.25,3)

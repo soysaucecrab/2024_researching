@@ -1,70 +1,5 @@
 import adsk.core, adsk.fusion, adsk.cam, traceback
 
-def circle():
-    app = adsk.core.Application.get()
-    if not app:
-        raise RuntimeError("Failed to get Fusion 360 application")
-
-    # Get the root component of the active design
-    design = app.activeProduct
-    root_comp = design.rootComponent
-    if not root_comp:
-        raise RuntimeError("Failed to get root component")
-
-    # Create a new sketch on the XY plane of the root component
-    sketches = root_comp.sketches
-    xz_plane = root_comp.xZConstructionPlane
-    sketch = sketches.add(xz_plane)
-    if not sketch:
-        raise RuntimeError("Failed to create sketch")
-    
-    circles = sketch.sketchCurves.sketchCircles
-    circle1 = circles.addByCenterRadius(adsk.core.Point3D.create(0,0,0),2)
-
-def rectangle():
-    # Get the active Fusion 360 application
-    app = adsk.core.Application.get()
-    if not app:
-        raise RuntimeError("Failed to get Fusion 360 application")
-
-    # Get the root component of the active design
-    design = app.activeProduct
-    root_comp = design.rootComponent
-    if not root_comp:
-        raise RuntimeError("Failed to get root component")
-
-    # Create a new sketch on the XY plane of the root component
-    sketches = root_comp.sketches
-    xz_plane = root_comp.xZConstructionPlane
-    sketch = sketches.add(xz_plane)
-    if not sketch:
-        raise RuntimeError("Failed to create sketch")
-    
-
-    # Create a rectangle using sketch geometry
-    lines = sketch.sketchCurves.sketchLines
-    start_point = adsk.core.Point3D.create(0, 0, 0)
-    end_point = adsk.core.Point3D.create(10, 0, 0)
-    line1 = lines.addByTwoPoints(start_point, end_point)
-    end_point = adsk.core.Point3D.create(10, 1, 0)
-    line2 = lines.addByTwoPoints(line1.endSketchPoint, end_point)
-    end_point = adsk.core.Point3D.create(0, 1, 0)
-    line3 = lines.addByTwoPoints(line2.endSketchPoint, end_point)
-    line4 = lines.addByTwoPoints(line3.endSketchPoint, line1.startSketchPoint)
-
-    # Create an extrusion feature based on the sketch to form a cube
-
-    # extrudes = root_comp.features.extrudeFeatures
-    # profile = sketch.profiles.item(0)
-    # distance = adsk.core.ValueInput.createByReal(10.0)  # Extrusion distance
-    # extrude_input = extrudes.createInput(profile, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
-    # extrude_input.setDistanceExtent(False, distance)
-    # cube = extrudes.add(extrude_input)
-    # if not cube:
-    #     raise RuntimeError("Failed to create cube")
-
-    # Hide the sketch
-    # sketch.isVisible = False
 def bridge_back(end,points, th, ex):
     try :
         #init
@@ -95,17 +30,17 @@ def bridge_back(end,points, th, ex):
         #down
         #other truss lines - outside
         for i in range(len(points[0])):
-            start_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i]+(th/2) , 0)
+            start_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i] , 0)
             end_point = adsk.core.Point3D.create(points[0][i]-(th/2), 0 , 0)
             line1 = lines.addByTwoPoints(start_point, end_point)
             lined.append(line1)
             end_point = adsk.core.Point3D.create(points[0][i]+(th/2), 0 , 0)
             line2 = lines.addByTwoPoints(lined[i*4].endSketchPoint, end_point)
             lined.append(line2)
-            end_point = adsk.core.Point3D.create(points[0][i]+(th/2), -points[1][i]+(th/2) , 0)
+            end_point = adsk.core.Point3D.create(points[0][i]+(th/2), -points[1][i] , 0)
             line2 = lines.addByTwoPoints(lined[i*4+1].endSketchPoint, end_point)
             lined.append(line2)
-            end_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i]+(th/2) , 0)
+            end_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i] , 0)
             line2 = lines.addByTwoPoints(lined[i*4+2].endSketchPoint, end_point)
             lined.append(line2)
         
@@ -126,7 +61,6 @@ def bridge_back(end,points, th, ex):
         if ui:
             ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
-#truss
 def bridge(end,points, th, ex):
     try :
         #init
@@ -161,13 +95,16 @@ def bridge(end,points, th, ex):
         lined.append(line)
         #other truss lines - outside
         for i in range(len(points[0])):
-            end_point = adsk.core.Point3D.create(points[0][i], -points[1][i] , 0)
-            line1 = lines.addByTwoPoints(lined[i].endSketchPoint, end_point)
+            end_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i] , 0)
+            line1 = lines.addByTwoPoints(lined[i*2].endSketchPoint, end_point)
             lined.append(line1)
+            end_point = adsk.core.Point3D.create(points[0][i]+(th/2), -points[1][i] , 0)
+            line2 = lines.addByTwoPoints(lined[i*2+1].endSketchPoint, end_point)
+            lined.append(line2)
         
         # uping
         end_point = adsk.core.Point3D.create(end, 0, 0)
-        line3 = lines.addByTwoPoints(lined[len(points[0])].endSketchPoint, end_point)
+        line3 = lines.addByTwoPoints(lined[len(points[0])*2].endSketchPoint, end_point)
         lined.append(line3)
         #uped
         # end_point = adsk.core.Point3D.create((w/n)/2, -h, 0)
@@ -190,12 +127,134 @@ def bridge(end,points, th, ex):
     except:
         if ui:
             ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
-      
-lists = [[1,2,3,4,5,6,7,8,9],[5,4,3,6,4,3,8,2,4]]
+
+def bridge_cut(end,points, th, ex):
+    try :
+        #init
+        # Get the active Fusion 360 application
+        app = adsk.core.Application.get()
+        if not app:
+            raise RuntimeError("Failed to get Fusion 360 application")
+        ui = app.userInterface
+        # Get the root component of the active design
+        design = app.activeProduct
+        root_comp = design.rootComponent
+        if not root_comp:
+            raise RuntimeError("Failed to get root component")
+
+        # Create a new sketch on the XY plane of the root component
+        sketches = root_comp.sketches
+        xz_plane = root_comp.xZConstructionPlane
+        sketch = sketches.add(xz_plane)
+        if not sketch:
+            raise RuntimeError("Failed to create sketch")
+        
+        #int
+        lines = sketch.sketchCurves.sketchLines
+        curvesToOffset = adsk.core.ObjectCollection.create()
+
+        ##this is for outside lines
+        #down
+        start_point = adsk.core.Point3D.create(end, -th, th)
+        end_point = adsk.core.Point3D.create(0, -th, th)
+        line1 = lines.addByTwoPoints(start_point, end_point)
+        end_point = adsk.core.Point3D.create(0, -max(points[1])-2, th)
+        line2 = lines.addByTwoPoints(line1.endSketchPoint, end_point)
+        end_point = adsk.core.Point3D.create(end, -max(points[1])-2, th)
+        line3 = lines.addByTwoPoints(line2.endSketchPoint, end_point)
+        end_point = adsk.core.Point3D.create(end, -th, th)
+        line4 = lines.addByTwoPoints(line3.endSketchPoint, end_point)
+        
+        #uped
+        # end_point = adsk.core.Point3D.create((w/n)/2, -h, 0)
+        # line4 = lines.addByTwoPoints(lined[2*n+1].endSketchPoint, end_point)
+        # lined.append(line4)
+
+
+        extrudes = root_comp.features.extrudeFeatures
+        profile = sketch.profiles.item(0)
+        distance = adsk.core.ValueInput.createByReal(ex-th*2)  # Extrusion distance
+        extrude_input = extrudes.createInput(profile, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
+
+        extrude_input.isJoin = True
+        extrude_input.setDistanceExtent(False, distance)
+
+        extrude_input.operation = adsk.fusion.FeatureOperations.CutFeatureOperation
+
+        cube = extrudes.add(extrude_input)
+
+    except:
+        if ui:
+            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+def bridge_con(end,points, th, ex):
+    try :
+        #init
+        # Get the active Fusion 360 application
+        app = adsk.core.Application.get()
+        if not app:
+            raise RuntimeError("Failed to get Fusion 360 application")
+        ui = app.userInterface
+        # Get the root component of the active design
+        design = app.activeProduct
+        root_comp = design.rootComponent
+        if not root_comp:
+            raise RuntimeError("Failed to get root component")
+
+        # Create a new sketch on the XY plane of the root component
+        sketches = root_comp.sketches
+        xz_plane = root_comp.xZConstructionPlane
+        sketch = sketches.add(xz_plane)
+        if not sketch:
+            raise RuntimeError("Failed to create sketch")
+        
+        #int
+        lined = []
+        lines = sketch.sketchCurves.sketchLines
+        curvesToOffset = adsk.core.ObjectCollection.create()
+
+        ##this is for outside lines
+        #down
+        #other truss lines - outside
+        for i in range(len(points[0])):
+            start_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i]+th , 0)
+            end_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i], 0)
+            line1 = lines.addByTwoPoints(start_point, end_point)
+            lined.append(line1)
+            end_point = adsk.core.Point3D.create(points[0][i]+(th/2), -points[1][i], 0)
+            line2 = lines.addByTwoPoints(lined[i*4].endSketchPoint, end_point)
+            lined.append(line2)
+            end_point = adsk.core.Point3D.create(points[0][i]+(th/2), -points[1][i]+th, 0)
+            line2 = lines.addByTwoPoints(lined[i*4+1].endSketchPoint, end_point)
+            lined.append(line2)
+            end_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i], 0)
+            line2 = lines.addByTwoPoints(lined[i*4+2].endSketchPoint, end_point)
+            lined.append(line2)
+        
+        #uped
+        # end_point = adsk.core.Point3D.create((w/n)/2, -h, 0)
+        # line4 = lines.addByTwoPoints(lined[2*n+1].endSketchPoint, end_point)
+        # lined.append(line4)
+
+        for i in range(len(points[0])):
+            extrudes = root_comp.features.extrudeFeatures
+            profile = sketch.profiles.item(i)
+            distance = adsk.core.ValueInput.createByReal(ex)  # Extrusion distance
+            extrude_input = extrudes.createInput(profile, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
+            extrude_input.setDistanceExtent(False, distance)
+            cube = extrudes.add(extrude_input)
+
+    except:
+        if ui:
+            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+lists = [[1,2,3,4,5,6,7,8,9],[3,4,5,5.5,6,5.5,5,4,3]]
 
 def main():
     bridge(10,lists,0.25,3)
     bridge_back(10,lists,0.25,3)
+    bridge_cut(10,lists,0.25,3)
+    bridge_con(10,lists,0.25,3)
 
 def run(context):
     try:
