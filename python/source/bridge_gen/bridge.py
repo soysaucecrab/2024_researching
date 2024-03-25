@@ -95,17 +95,17 @@ def bridge_back(end,points, th, ex):
         #down
         #other truss lines - outside
         for i in range(len(points[0])):
-            start_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i] , 0)
+            start_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i]+(th/2) , 0)
             end_point = adsk.core.Point3D.create(points[0][i]-(th/2), 0 , 0)
             line1 = lines.addByTwoPoints(start_point, end_point)
             lined.append(line1)
             end_point = adsk.core.Point3D.create(points[0][i]+(th/2), 0 , 0)
             line2 = lines.addByTwoPoints(lined[i*4].endSketchPoint, end_point)
             lined.append(line2)
-            end_point = adsk.core.Point3D.create(points[0][i]+(th/2), -points[1][i] , 0)
+            end_point = adsk.core.Point3D.create(points[0][i]+(th/2), -points[1][i]+(th/2) , 0)
             line2 = lines.addByTwoPoints(lined[i*4+1].endSketchPoint, end_point)
             lined.append(line2)
-            end_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i] , 0)
+            end_point = adsk.core.Point3D.create(points[0][i]-(th/2), -points[1][i]+(th/2) , 0)
             line2 = lines.addByTwoPoints(lined[i*4+2].endSketchPoint, end_point)
             lined.append(line2)
         
