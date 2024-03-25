@@ -37,9 +37,10 @@ def main():
         tool = sketch.profiles.item(0)
 
         # Perform the cut operation.
-        cut_input = root_comp.features.combineFeatures.createInput(bodies_to_cut, tool)
-        cut_input.operation = adsk.fusion.FeatureOperations.CutFeatureOperation
-        root_comp.features.combineFeatures.add(cut_input)
+        combine_features = root_comp.features.combineFeatures
+        combine_input = combine_features.createInput(bodies_to_cut, tool)
+        combine_input.operation = adsk.fusion.FeatureOperations.CutFeatureOperation
+        combine_features.add(combine_input)
 
     except Exception as e:
         ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
